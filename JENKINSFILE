@@ -1,0 +1,71 @@
+pipeline {
+    agent any
+    //Evita checkout a git automatico
+    options { skipDefaultCheckout() }
+
+    stages {
+        //Obtener codigo
+        stage('Get Code') {
+            steps {
+                //Limpia el workspace
+                deleteDir()
+
+                //Obtener codigo fuente rama develop
+                withCredentials([string(credentialsId: 'GIT_TOKEN', variable: 'TOKEN')]) {
+                    sh '''
+                        # Clonar repo
+                        echo ${WORKSPACE}
+                        git clone --branch develop https://$TOKEN@github.com/josegcort/devops-aws.git .
+                    '''
+                }
+
+                //Almacena temporalmente el codigo
+                stash name:'code', includes:'**'
+            }
+        }
+
+        //Test de analisis de codigo estatico con Flake8 y Test de seguridad con Bandit
+        stage('Static') {
+            steps {
+                //Recupera el codigo
+                unstash 'code'
+
+                //Asegura la continuidad del pipeline, solo se revisa el directorio src
+                catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
+                    sh '''
+                        mkdir -p reports
+
+                        /var/lib/jenkins/venv/bin/python3 -m flake8 --exit-zero --format=pylint src > reports/result-flake8.out
+
+                        /var/lib/jenkins/venv/bin/python3 -m bandit --exit-zero -r src -f custom -o reports/result-bandit.out --msg-template "{abspath}:{line}: [{test_id}] {msg}"
+                    '''
+                    recordIssues(
+                        tools: [
+                            flake8(name: 'Flake8', pattern: 'reports/result-flake8.out'),
+                            pyLint(name: 'Bandit', pattern: 'reports/result-bandit.out')
+                        ]
+                    )
+                }
+            }
+        }
+
+        //Deploy a staging con SAM CLI
+        stage('Deploy') {
+            steps {
+                unstash 'code'
+                sh '''
+                    sam build
+
+                    sam deploy --config-env staging
+                '''
+            }
+        }
+
+        //Limpieza del WORKSPACE
+        stage('Clean') {
+            steps {
+                deleteDir()
+            }
+        }
+    }
+}
