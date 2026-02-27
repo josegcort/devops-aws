@@ -10,7 +10,7 @@ pipeline {
                 //Limpia el workspace
                 deleteDir()
                 
-                //Obtener codigo fuente rama develop con token
+                //Obtener codigo fuente rama master con token
                 //set -e Hace que el pipeline falle si cualquier comando devuelve error.
                 withCredentials([string(credentialsId: 'GIT_TOKEN', variable: 'TOKEN')]) {
                     sh '''
