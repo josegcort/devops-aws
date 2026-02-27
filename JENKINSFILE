@@ -10,11 +10,14 @@ pipeline {
                 //Limpia el workspace
                 deleteDir()
 
-                //Obtener codigo fuente rama develop
+                //Obtener codigo fuente rama develop con token
+                //set -e Hace que el pipeline falle si cualquier comando devuelve error.
                 withCredentials([string(credentialsId: 'GIT_TOKEN', variable: 'TOKEN')]) {
                     sh '''
-                        # Clonar repo
+                        set -e
+
                         echo ${WORKSPACE}
+
                         git clone --branch develop https://$TOKEN@github.com/josegcort/devops-aws.git .
                     '''
                 }
@@ -31,8 +34,11 @@ pipeline {
                 unstash 'code'
 
                 //Asegura la continuidad del pipeline, solo se revisa el directorio src
+                //set +e Hace que el pipeline no se detiene aunque un comando retorne error.
                 catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
                     sh '''
+                        set +e
+
                         mkdir -p reports
 
                         /var/lib/jenkins/venv/bin/python3 -m flake8 --exit-zero --format=pylint src > reports/result-flake8.out
@@ -52,8 +58,13 @@ pipeline {
         //Deploy a staging con SAM CLI
         stage('Deploy') {
             steps {
+                //Recupera el codigo
                 unstash 'code'
+
+                //set -e Hace que el pipeline falle si cualquier comando devuelve error.
                 sh '''
+                    set -e
+
                     sam build
 
                     sam deploy --config-env staging
@@ -64,9 +75,13 @@ pipeline {
         //Test del servicio REST desplegado en staging
         stage('Rest Test') {
             steps {
-                deleteDir()
+                //Recupera el codigo
                 unstash 'code'
+
+                //set -e Hace que el pipeline falle si cualquier comando devuelve error.
                 sh '''
+                    set -e
+
                     export BASE_URL="$(aws cloudformation describe-stacks --stack-name staging-todo-list-aws --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text)"
 
                     /var/lib/jenkins/venv/bin/python3 -m pytest --junitxml=reports/result-rest.xml test/integration/todoApiTest.py
@@ -77,9 +92,52 @@ pipeline {
             }
         }
 
-        //Limpieza del WORKSPACE
-        stage('Clean') {
+        //Marcar la versión como “Release” y mergear a master
+        stage('Promote') {
             steps {
+                //Recupera el codigo
+                unstash 'code'
+
+                //Obtener codigo fuente rama develop con token
+                //set -e Hace que el pipeline falle si cualquier comando devuelve error.
+                withCredentials([string(credentialsId: 'GIT_TOKEN', variable: 'TOKEN')]) {
+                    sh '''
+                        set -e
+
+                        echo "Configurando credenciales..."
+                        git config user.name "jenkins"
+                        git config user.email "jenkins@ci.local"
+
+                        echo "Obteniendo última versión desde CHANGELOG.md..."
+                        VERSION=$(sed -n "s/^## \\[\\([^]]*\\)\\].*/\\1/p" CHANGELOG.md | tail -n 1)
+
+                        echo "Versión detectada: $VERSION"
+
+                        echo "Cambiando a rama master..."
+                        git fetch origin
+                        git checkout master
+                        git pull https://$TOKEN@github.com/josegcort/devops-aws.git master
+
+                        echo "Merge de develop → master..."
+                        git merge develop --no-ff -m "Release $VERSION"
+
+                        echo "Creando tag v$VERSION..."
+                        git tag -a v$VERSION -m "Release version $VERSION"
+
+                        echo "Push a master..."
+                        git push https://$TOKEN@github.com/josegcort/devops-aws.git master
+
+                        echo "Push del tag..."
+                        git push https://$TOKEN@github.com/josegcort/devops-aws.git v$VERSION
+                    '''
+                }
+            }
+        }
+
+        //Limpia el workspace
+        stage('Cleanup') {
+            steps {
+                //Limpia el workspace
                 deleteDir()
             }
         }
