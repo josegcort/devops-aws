@@ -133,5 +133,13 @@ pipeline {
                 }
             }
         }
+
+        //Limpia el workspace
+        stage('Cleanup') {
+            steps {
+                //Limpia el workspace
+                deleteDir()
+            }
+        }
     }
 }
