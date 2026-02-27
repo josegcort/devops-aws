@@ -19,3 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.3] - 2026-02-27
 ### Added
 - Fixed GitHub Hook
+
+## [1.0.4] - 2026-02-27
+### Added
+- JENKINSFILE and samconfig.toml to .gitignore
