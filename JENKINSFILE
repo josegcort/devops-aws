@@ -72,7 +72,7 @@ pipeline {
             }
         }
 
-        //Test del servicio REST desplegado en staging
+        //Test del servicio REST desplegado en staging, prueba todos los endpoints
         stage('Rest Test') {
             steps {
                 //Recupera el codigo
