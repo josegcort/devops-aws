@@ -6,8 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] - 2021-01-08
 ### Added
-- Versión inicial de código.
-
+- Versión inicial de código. 
+ 
 ## [1.0.1] - 2026-02-26
 ###
  - Added - Pipeline CI/CD
