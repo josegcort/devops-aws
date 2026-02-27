@@ -1,0 +1,75 @@
+pipeline {
+    agent any
+    //Evita checkout a git automatico
+    options { skipDefaultCheckout() }
+
+    stages {
+        //Obtener codigo
+        stage('Get Code') {
+            steps {
+                //Limpia el workspace
+                deleteDir()
+                
+                //Obtener codigo fuente rama develop con token
+                //set -e Hace que el pipeline falle si cualquier comando devuelve error.
+                withCredentials([string(credentialsId: 'GIT_TOKEN', variable: 'TOKEN')]) {
+                    sh '''
+                        set -e
+
+                        echo ${WORKSPACE}
+
+                        git clone --branch master https://$TOKEN@github.com/josegcort/devops-aws.git .
+                    '''
+                }
+
+                //Almacena temporalmente el codigo
+                stash name:'code', includes:'**'
+            }
+        }
+
+        //Deploy a production con SAM CLI
+        stage('Deploy') {
+            steps {
+                //Recupera el codigo
+                unstash 'code'
+
+                //set -e Hace que el pipeline falle si cualquier comando devuelve error.
+                sh '''
+                    set -e
+
+                    sam build
+
+                    sam deploy --config-env production
+                '''
+            }
+        }
+
+        //Test del servicio REST desplegado en production, prueba de los endpoints de solo lectura
+        stage('Rest Test') {
+            steps {
+                //Recupera el codigo
+                unstash 'code'
+
+                //set -e Hace que el pipeline falle si cualquier comando devuelve error.
+                sh '''
+                    set -e
+
+                    export BASE_URL="$(aws cloudformation describe-stacks --stack-name production-todo-list-aws --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text)"
+
+                    /var/lib/jenkins/venv/bin/python3 -m pytest --junitxml=reports/result-rest.xml test/integration/todoApiTest.py -k "test_api_listtodos or test_api_gettodo"
+                '''
+
+                //Resultados tests del servicio REST
+                junit 'reports/result-rest.xml'
+            }
+        }
+
+        //Limpia el workspace
+        stage('Cleanup') {
+            steps {
+                //Limpia el workspace
+                deleteDir()
+            }
+        }
+    }
+}
