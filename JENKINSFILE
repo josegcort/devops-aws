@@ -109,7 +109,7 @@ pipeline {
                         git config user.email "jenkins@ci.local"
 
                         echo "Obteniendo última versión desde CHANGELOG.md..."
-                        VERSION=$(grep -m 1 -oP '(?<=## \\[)[^]]+' CHANGELOG.md)
+                        VERSION=$(sed -n "s/^## \\[\\([^]]*\\)\\].*/\\1/p" CHANGELOG.md | tail -n 1)
 
                         echo "Versión detectada: $VERSION"
 
