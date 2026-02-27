@@ -5,6 +5,3 @@ tests
 pyenvunittests
 .coverage
 coverage.xml
-
-JENKINSFILE
-samconfig.toml
