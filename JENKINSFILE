@@ -1,7 +1,7 @@
 pipeline {
     agent any
-    // //Evita checkout a git automatico
-    // options { skipDefaultCheckout() }
+    //Evita checkout a git automatico
+    options { skipDefaultCheckout() }
 
     stages {
         //Obtener codigo
@@ -10,6 +10,8 @@ pipeline {
                 //Limpia el workspace
                 deleteDir()
 
+                checkout scm
+                
                 //Obtener codigo fuente rama develop con token
                 //set -e Hace que el pipeline falle si cualquier comando devuelve error.
                 withCredentials([string(credentialsId: 'GIT_TOKEN', variable: 'TOKEN')]) {
