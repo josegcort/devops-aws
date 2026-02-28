@@ -9,9 +9,7 @@ pipeline {
             steps {
                 //Limpia el workspace
                 deleteDir()
-                
-                checkout scm
-                
+                               
                 //Obtener codigo fuente rama develop con token
                 //set -e Hace que el pipeline falle si cualquier comando devuelve error.
                 withCredentials([string(credentialsId: 'GIT_TOKEN', variable: 'TOKEN')]) {
