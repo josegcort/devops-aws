@@ -1,7 +1,7 @@
 pipeline {
-    agent any
+    agent { label 'main' }
     //Evita checkout a git automatico
-    // options { skipDefaultCheckout() }
+    options { skipDefaultCheckout() }
 
     stages {
         //Obtener codigo
