@@ -55,3 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.11] - 2026-02-27
 ### Move
 - Configuration files were moved
+
+## [1.0.12] - 2026-02-27
+### Added
+- Pipeline CI/CD
