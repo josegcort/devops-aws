@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed merge
 
 ## [1.0.5] - 2026-02-27
-### Added
+### Change
 - Cloudformation stacks removal
 
 ## [1.0.6] - 2026-02-27
@@ -47,3 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.9] - 2026-02-27
 ### Added
 - New version
+
+## [1.0.10] - 2026-02-27
+### Change
+- Cloudformation stacks removal
