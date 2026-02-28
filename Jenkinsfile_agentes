@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'main' }
+    agent none
     //Evita checkout a git automatico
     options { skipDefaultCheckout() }
 
