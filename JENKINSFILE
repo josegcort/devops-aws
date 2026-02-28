@@ -19,6 +19,8 @@ pipeline {
                         echo ${WORKSPACE}
 
                         git clone --branch master https://$TOKEN@github.com/josegcort/devops-aws.git .
+
+                        wget https://raw.githubusercontent.com/josegcort/devops-aws-config/refs/heads/production/samconfig.toml
                     '''
                 }
 
