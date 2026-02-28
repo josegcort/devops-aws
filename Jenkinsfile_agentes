@@ -1,13 +1,15 @@
 pipeline {
     agent any
     //Evita checkout a git automatico
-    // options { skipDefaultCheckout() }
+    options { skipDefaultCheckout() }
 
     stages {
         //Obtener codigo
         stage('Get Code') {
             agent { label 'main' }
             steps {
+                checkout scm
+                
                 //Identificacion del nodo
                 sh '''
                     whoami
