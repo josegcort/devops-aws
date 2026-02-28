@@ -97,5 +97,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multibranch Pipeline with Cloudformation stacks removal
 
 ## [1.0.22] - 2026-02-28
-### Change
+### Repetition
 - Multibranch Pipeline with Cloudformation stacks removal
