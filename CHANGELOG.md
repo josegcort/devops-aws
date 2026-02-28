@@ -39,3 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.7] - 2026-02-27
 ### Added
 - Pipeline multinodo CD
+
+## [1.0.8] - 2026-02-27
+### Fixed
+- Pipeline multinodo CD
