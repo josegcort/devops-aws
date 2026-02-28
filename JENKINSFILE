@@ -7,6 +7,8 @@ pipeline {
         //Obtener codigo
         stage('Get Code') {
             steps {
+                checkout scm
+
                 //Limpia el workspace
                 deleteDir()
                                
